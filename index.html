@@ -26,7 +26,22 @@
     --display: 'Italiana', serif;
     --body: 'Jost', sans-serif;
   }
-
+  /* ---------- making of video ---------- */
+  .making-of-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 60px auto; 
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .making-of-container video {
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--line-strong);
+    border-radius: 4px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+  }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
@@ -550,7 +565,13 @@
   </div>
 
   <div class="divider"><svg class="gem" viewBox="0 0 100 90"><polygon points="35,5 65,5 92,25 50,85 8,25"/></svg><span class="ln"></span></div>
+  <!-- VIDEO -->
+  <div class="making-of-container reveal">
+  <video src="Making of.mp4" autoplay loop muted playsinline></video>
+  <p class="eyebrow" style="text-align: center; margin-top: 12px;">Making of - Dietro le quinte</p>
+  </div>
 
+  <div class="divider"><svg class="gem" viewBox="0 0 100 90"><polygon points="35,5 65,5 92,25 50,85 8,25"/></svg><span class="ln"></span></div>
   <!-- CURATOR -->
   <div class="d-section reveal" id="curator">
     <div class="curator">
