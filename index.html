@@ -1,1 +1,963 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DIAMANTI — Sinan Turaman</title>
+<meta name="description" content="DIAMANTI — an exhibition by Sinan Turaman. 24 portraits, 24 hours, dedicated to the light inside us.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 90'%3E%3Crect width='100' height='90' fill='%23060606'/%3E%3Cpolygon points='35,5 65,5 92,25 50,85 8,25' fill='none' stroke='white' stroke-width='4'/%3E%3Cline x1='8' y1='25' x2='92' y2='25' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Italiana&family=Jost:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 
+<style>
+  :root{
+    --bg: #070707;
+    --bg-soft: #0e0e0f;
+    --bg-card: #111113;
+    --fg: #f4f1ec;
+    --fg-dim: #b9b4ac;
+    --fg-faint: #7d7a75;
+    --line: rgba(244,241,236,0.14);
+    --line-strong: rgba(244,241,236,0.32);
+    --ice: #bfe1ff;
+    --ice-dim: rgba(191,225,255,0.55);
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --display: 'Italiana', serif;
+    --body: 'Jost', sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:var(--body);
+    font-weight:300;
+    overflow:hidden;
+    height:100vh;
+    width:100vw;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;letter-spacing:.01em;}
+  p{margin:0;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:var(--body);background:none;border:none;color:inherit;cursor:pointer;}
+  img{max-width:100%;display:block;}
+  ::selection{background:var(--fg);color:var(--bg);}
+
+  .eyebrow{
+    font-size:.72rem;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--fg-faint);
+    font-weight:500;
+  }
+
+  /* ---------- focus ---------- */
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible{
+    outline:1px solid var(--fg);
+    outline-offset:4px;
+  }
+
+  /* ---------- views ---------- */
+  .view{
+    position:fixed; inset:0;
+    height:100vh; width:100vw;
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity 1.1s var(--ease);
+  }
+  .view.active{opacity:1; visibility:visible; pointer-events:auto;}
+  #view-details.active{overflow-y:auto; overflow-x:hidden;}
+  #view-splash, #view-landing{
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* ---------- persistent controls ---------- */
+  .controls{
+    position:fixed; top:0; right:0;
+    z-index:60;
+    display:flex; align-items:center; gap:18px;
+    padding:22px 26px;
+  }
+  .ctrl-btn{
+    display:flex; align-items:center; gap:6px;
+    font-size:.7rem; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--fg-dim);
+    padding:6px 2px;
+    transition:color .3s;
+  }
+  .ctrl-btn:hover{color:var(--fg);}
+  .lang-toggle{display:flex; gap:8px; font-size:.72rem; letter-spacing:.14em;}
+  .lang-toggle button{color:var(--fg-faint); padding:4px 2px; transition:color .3s;}
+  .lang-toggle button[aria-pressed="true"]{color:var(--fg); border-bottom:1px solid var(--fg);}
+  .lang-toggle button:hover{color:var(--fg);}
+  .lang-sep{color:var(--line-strong);}
+  .mute-btn svg{width:16px;height:16px;display:block;}
+  #replay-intro-btn svg{width:14px;height:14px;display:block;}
+  .home-mark{
+    position:fixed; top:0; left:0; z-index:60;
+    display:flex; align-items:center; gap:10px;
+    padding:22px 26px;
+    font-size:.78rem; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--fg-dim);
+    opacity:0; pointer-events:none;
+    transition:opacity .6s var(--ease);
+  }
+  .home-mark.show{opacity:1; pointer-events:auto;}
+  .home-mark:hover{color:var(--fg);}
+  .home-mark svg{width:14px;height:14px;}
+
+  /* ---------- gem icon ---------- */
+  .gem{display:block;}
+  .gem line, .gem polygon{
+    fill:none; stroke:currentColor; stroke-width:1.4;
+    stroke-linecap:round; stroke-linejoin:round;
+    vector-effect:non-scaling-stroke;
+  }
+  .gem .facet{animation:twinkle 5.5s ease-in-out infinite;}
+  .gem .f1{animation-delay:0s;}
+  .gem .f2{animation-delay:.5s;}
+  .gem .f3{animation-delay:1s;}
+  .gem .f4{animation-delay:1.5s;}
+  .gem .f5{animation-delay:2s;}
+  .gem .f6{animation-delay:2.5s;}
+  .gem .f7{animation-delay:3s;}
+  .gem .spark{transform-origin:center; animation:spark 5.5s ease-in-out infinite;}
+  @keyframes twinkle{0%,100%{opacity:.35;} 50%{opacity:1;}}
+  @keyframes spark{0%,80%,100%{opacity:0; transform:scale(.4);} 88%{opacity:1; transform:scale(1.15);} 94%{opacity:.6; transform:scale(.8);}}
+
+  /* ---------- splash ---------- */
+  #view-splash{
+    flex-direction:column; gap:34px;
+    cursor:pointer;
+  }
+  .splash-gem-wrap{
+    width:148px; animation:breathe 6s ease-in-out infinite;
+  }
+  @keyframes breathe{0%,100%{transform:scale(1);} 50%{transform:scale(1.045);}}
+  .splash-click{
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+  }
+  .splash-click .word{
+    font-size:.78rem; letter-spacing:.42em; text-transform:uppercase;
+    color:var(--fg-dim);
+    animation:pulse 2.6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:.45;} 50%{opacity:1;}}
+  .splash-click .stem{width:1px; height:26px; background:var(--line-strong); animation:stem 2.6s ease-in-out infinite;}
+  @keyframes stem{0%,100%{height:18px;} 50%{height:30px;}}
+  .splash-hint{
+    position:absolute; bottom:36px; left:0; right:0;
+    text-align:center;
+    font-size:.66rem; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--fg-faint);
+  }
+
+  /* ---------- landing ---------- */
+  #view-landing{padding:0 24px;}
+  .landing-inner{
+    display:flex; flex-direction:column; align-items:center; gap:42px;
+    max-width:720px; width:100%;
+  }
+  .hero-lines{
+    display:flex; flex-direction:column; align-items:center; gap:18px;
+    text-align:center;
+  }
+  .hero-block{display:flex; flex-direction:column; align-items:center; gap:6px;}
+  .hero-line{
+    font-family:var(--display);
+    font-size:clamp(1.15rem, 2.7vw, 1.9rem);
+    line-height:1.5;
+    color:var(--fg);
+    min-height:1.5em;
+  }
+  .hero-line.accent{color:var(--fg); letter-spacing:.04em;}
+  .caret{
+    display:inline-block; width:2px; height:1em;
+    background:var(--fg); margin-left:3px; vertical-align:-0.12em;
+    animation:caretBlink .9s steps(1) infinite;
+  }
+  @keyframes caretBlink{0%,49%{opacity:1;} 50%,100%{opacity:0;}}
+  .hero-rule{
+    width:0; height:1px; background:var(--line-strong);
+    opacity:0; transition:opacity 1.6s var(--ease), width 1.6s var(--ease);
+  }
+  .hero-rule.in{opacity:1; width:36px;}
+  .details-cta{
+    display:flex; align-items:center; gap:12px;
+    font-size:.78rem; letter-spacing:.32em; text-transform:uppercase;
+    color:var(--fg);
+    padding:10px 4px;
+    opacity:0; transform:translateY(20px); filter:blur(6px);
+    transition:opacity 1.5s var(--ease), transform 1.5s var(--ease), filter 1.5s var(--ease);
+    border-bottom:1px solid transparent;
+  }
+  .details-cta.in{opacity:1; transform:translateY(0); filter:blur(0px);}
+  .details-cta .arrow{
+    width:18px; height:9px; position:relative; display:inline-block;
+  }
+  .details-cta .arrow svg{width:100%;height:100%;}
+  .details-cta:hover{border-bottom-color:var(--line-strong);}
+  .details-cta:hover .arrow{animation:nudge .9s ease-in-out infinite;}
+  @keyframes nudge{0%,100%{transform:translateX(0);} 50%{transform:translateX(4px);}}
+
+  .landing-foot{
+    position:fixed; bottom:26px; left:0; right:0;
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+  }
+  .logo-row{display:flex; align-items:center; gap:32px; flex-wrap:wrap; justify-content:center; opacity:.88;}
+  .logo-row img{height:21px; width:auto; opacity:.9;}
+  .logo-row .st-mark img{height:32px; opacity:.95;}
+  .logo-row .text-logo{
+    font-family:var(--body); font-weight:400; font-size:.92rem; letter-spacing:.02em; color:var(--fg-dim);
+  }
+
+  /* ---------- details ---------- */
+  #view-details{background:var(--bg);}
+  .d-section{
+    max-width:1080px; margin:0 auto;
+    padding:120px 28px 0;
+  }
+  .d-section.tight{padding-top:90px;}
+  .reveal{opacity:0; transform:translateY(24px); transition:opacity .9s var(--ease), transform .9s var(--ease);}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  /* hero */
+  .d-hero{
+    position:relative; height:100vh; min-height:560px;
+    display:flex; align-items:flex-end;
+    padding:0 0 64px;
+    overflow:hidden;
+  }
+  .d-hero-bg{
+    position:absolute; inset:0;
+    background-size:cover; background-position:50% 38%;
+  }
+  .d-hero-bg::after{
+    content:'';
+    position:absolute; inset:0;
+    background:
+      linear-gradient(180deg, rgba(7,7,7,.12) 0%, rgba(7,7,7,.3) 45%, rgba(7,7,7,.97) 92%),
+      radial-gradient(ellipse 72% 95% at 50% 40%, transparent 60%, rgba(7,7,7,.32) 88%, rgba(7,7,7,.7) 100%);
+  }
+  .d-hero-content{
+    position:relative; z-index:2;
+    width:100%; max-width:1080px; margin:0 auto;
+    padding:0 28px;
+    display:flex; flex-direction:column; gap:18px;
+  }
+  .d-hero-content .eyebrow{color:var(--fg-dim);}
+  .d-title{
+    font-size:clamp(3.4rem, 13vw, 8.5rem);
+    line-height:.92;
+    letter-spacing:.01em;
+  }
+  .d-hero-meta{
+    display:flex; flex-wrap:wrap; gap:26px 40px;
+    margin-top:8px;
+  }
+  .d-hero-meta div{display:flex; flex-direction:column; gap:5px;}
+  .d-hero-meta .label{font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-faint);}
+  .d-hero-meta .value{font-size:.96rem; color:var(--fg);}
+  .scroll-cue{
+    position:absolute; bottom:28px; left:28px; z-index:2;
+    display:flex; align-items:center; gap:10px;
+    font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-faint);
+  }
+  .scroll-cue .stem{width:1px;height:30px;background:var(--line-strong); animation:stem 2.6s ease-in-out infinite;}
+
+  /* about */
+  .split{
+    display:grid; grid-template-columns:.85fr 1.15fr; gap:64px;
+    align-items:start;
+  }
+  .d-h2{font-size:clamp(1.9rem,4.2vw,2.9rem); line-height:1.18; margin-bottom:22px;}
+  .body-copy{font-size:1.02rem; line-height:1.85; color:var(--fg-dim); font-weight:300;}
+  .body-copy + .body-copy{margin-top:18px;}
+  .credit-line{margin-top:22px; font-size:.78rem; color:var(--fg-faint); letter-spacing:.03em;}
+
+  .divider{
+    max-width:1080px; margin:90px auto 0; padding:0 28px;
+    display:flex; align-items:center; gap:18px; color:var(--fg-faint);
+  }
+  .divider .gem{width:14px;}
+  .divider .ln{flex:1; height:1px; background:var(--line);}
+
+  /* quote */
+  .quote-section{padding:90px 28px; text-align:center;}
+  .quote-mark{font-family:var(--display); font-size:clamp(1.6rem,4vw,2.6rem); line-height:1.5; max-width:780px; margin:0 auto; color:var(--fg);}
+  .quote-attr{margin-top:20px; font-size:.78rem; letter-spacing:.18em; text-transform:uppercase; color:var(--fg-faint);}
+
+  /* gallery */
+  .gallery-head{max-width:680px; margin-bottom:48px;}
+  .gallery-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    grid-auto-rows:240px;
+    gap:14px;
+    padding-bottom:10px;
+  }
+  .g-item{
+    position:relative; overflow:hidden; cursor:pointer;
+    background:var(--bg-card);
+  }
+  .g-item img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    transition:transform 1.1s var(--ease), filter .6s;
+    filter:grayscale(.08) brightness(.92);
+  }
+  .g-item:hover img{transform:scale(1.06); filter:grayscale(0) brightness(1);}
+  .g-cap{
+    position:absolute; left:0; right:0; bottom:0;
+    padding:16px 16px 14px;
+    background:linear-gradient(180deg, transparent, rgba(7,7,7,.92));
+    opacity:0; transform:translateY(8px);
+    transition:opacity .4s, transform .4s;
+  }
+  .g-item:hover .g-cap{opacity:1; transform:translateY(0);}
+  .g-cap .name{font-family:var(--display); font-size:1.05rem;}
+  .g-cap .med{font-size:.68rem; letter-spacing:.05em; color:var(--fg-dim); margin-top:3px;}
+
+  /* curator */
+  .curator{
+    max-width:760px; margin:0 auto; text-align:center;
+  }
+  .curator .d-h2{margin-bottom:26px;}
+  .curator p{font-size:1.08rem; line-height:1.85; color:var(--fg-dim);}
+  .curator p + p{margin-top:18px;}
+  .curator .sign{margin-top:30px; font-family:var(--display); font-size:1.15rem; color:var(--fg);}
+  .curator .sign small{display:block; font-family:var(--body); font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; color:var(--fg-faint); margin-top:6px;}
+
+  /* visit */
+  .visit-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:28px;
+  }
+  .visit-card{
+    border:1px solid var(--line); padding:34px 30px;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .visit-card .v-name{font-family:var(--display); font-size:1.5rem;}
+  .visit-card .v-line{font-size:.92rem; color:var(--fg-dim); line-height:1.7;}
+  .visit-card a.v-line{transition:color .3s;}
+  .visit-card a.v-line:hover{color:var(--fg);}
+  .tba{font-size:.7rem; letter-spacing:.15em; text-transform:uppercase; color:var(--fg-faint); margin-top:6px;}
+
+  /* footer */
+  .d-footer{
+    margin-top:110px; padding:54px 28px 60px;
+    border-top:1px solid var(--line);
+    display:flex; flex-direction:column; align-items:center; gap:26px;
+    text-align:center;
+  }
+  .d-footer .logo-row img{height:23px;}
+  .d-footer .st-mark img{height:38px;}
+  .copyright{font-size:.68rem; letter-spacing:.1em; color:var(--fg-faint);}
+
+  @media (max-width:880px){
+    .split{grid-template-columns:1fr; gap:30px;}
+    .visit-grid{grid-template-columns:1fr;}
+    .gallery-grid{grid-template-columns:repeat(2,1fr); grid-auto-rows:230px;}
+    .d-section{padding:90px 20px 0;}
+    .d-hero-content{padding:0 20px;}
+  }
+  @media (max-width:520px){
+    .controls{padding:16px 16px;}
+    .home-mark{padding:16px 16px;}
+    .gallery-grid{grid-template-columns:repeat(2,1fr); grid-auto-rows:190px; gap:8px;}
+    .d-hero-meta{gap:18px 28px;}
+    .quote-section{padding:64px 20px;}
+    .divider{margin-top:60px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+    .hero-line, .details-cta, .reveal{opacity:1 !important; transform:none !important; filter:none !important;}
+    .hero-rule{opacity:1 !important; width:36px !important;}
+  }
+</style>
+</head>
+<body>
+
+<audio id="bg-audio" loop preload="auto">
+  <source src="assets/audio/low-pulse-drift.mp3" type="audio/mpeg">
+</audio>
+
+<!-- persistent controls -->
+<div class="controls">
+  <div class="lang-toggle" role="group" aria-label="Language">
+    <button type="button" data-set-lang="tr" aria-pressed="false">TR</button>
+    <span class="lang-sep">/</span>
+    <button type="button" data-set-lang="en" aria-pressed="true">EN</button>
+  </div>
+  <button type="button" class="ctrl-btn" id="skip-intro-btn" style="display:none">
+    <span data-i18n="ctrl.skip">Skip</span>
+  </button>
+  <button type="button" class="ctrl-btn" id="replay-intro-btn" style="display:none" aria-label="Replay intro">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 12a8.5 8.5 0 1 0 2.8-6.3"/><path d="M3.5 4.5v4.2h4.2"/></svg>
+    <span data-i18n="ctrl.replay">Replay</span>
+  </button>
+  <button type="button" class="mute-btn ctrl-btn" id="mute-toggle" aria-label="Mute sound" aria-pressed="false">
+    <svg id="icon-sound-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 010 7"/><path d="M19 6a8.5 8.5 0 010 12"/></svg>
+    <svg id="icon-sound-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" style="display:none"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16 9l5 6M21 9l-5 6"/></svg>
+  </button>
+</div>
+
+<a href="#" class="home-mark" id="home-mark" data-i18n="nav.home">
+  <svg class="gem" viewBox="0 0 100 90" aria-hidden="true"><polygon points="35,5 65,5 92,25 50,85 8,25"/></svg>
+  <span data-i18n="nav.home">Diamanti</span>
+</a>
+
+<!-- ===================== SPLASH ===================== -->
+<section id="view-splash" class="view active" role="button" tabindex="0" aria-label="Enter site">
+  <div class="splash-gem-wrap">
+    <svg class="gem" viewBox="0 0 100 90" style="width:100%;color:var(--fg)">
+      <polygon points="35,5 65,5 92,25 50,85 8,25" class="facet f1"/>
+      <line x1="8" y1="25" x2="92" y2="25" class="facet f2"/>
+      <line x1="35" y1="5" x2="50" y2="25" class="facet f3"/>
+      <line x1="65" y1="5" x2="50" y2="25" class="facet f4"/>
+      <line x1="50" y1="25" x2="50" y2="85" class="facet f5"/>
+      <line x1="29" y1="25" x2="50" y2="85" class="facet f6"/>
+      <line x1="71" y1="25" x2="50" y2="85" class="facet f7"/>
+      <g class="spark" stroke="none" fill="currentColor">
+        <circle cx="50" cy="13" r="1.6"/>
+      </g>
+      <g class="spark" stroke="none" fill="currentColor" style="animation-delay:2.2s">
+        <circle cx="18" cy="27" r="1.2"/>
+      </g>
+    </svg>
+  </div>
+  <div class="splash-click">
+    <span class="stem"></span>
+    <span class="word" data-i18n="splash.click">Click</span>
+  </div>
+  <div class="splash-hint" data-i18n="splash.hint">Sound on for the full experience</div>
+</section>
+
+<!-- ===================== LANDING ===================== -->
+<section id="view-landing" class="view">
+  <div class="landing-inner">
+    <div class="hero-rule" id="hero-rule-top"></div>
+    <div class="hero-lines">
+      <div class="hero-block">
+        <p class="hero-line" data-line="0" data-i18n="hero.line1">Visualizing the spiritual soul,</p>
+        <p class="hero-line" data-line="1" data-i18n="hero.line2">Shining with the splendor of precious stones&hellip;</p>
+      </div>
+      <div class="hero-block">
+        <p class="hero-line" data-line="2" data-i18n="hero.line3">A collection dedicated to the light inside us.</p>
+      </div>
+      <div class="hero-block">
+        <p class="hero-line accent" data-line="3" data-i18n="hero.line4">Experience DIAMANTI,</p>
+        <p class="hero-line accent" data-line="4" data-i18n="hero.line5">by Sinan Turaman.</p>
+      </div>
+    </div>
+    <a href="#" class="details-cta" id="open-details">
+      <span data-i18n="hero.details">Details</span>
+      <span class="arrow"><svg viewBox="0 0 18 9" fill="none" stroke="currentColor" stroke-width="1.2"><line x1="0" y1="4.5" x2="16" y2="4.5"/><polyline points="11,0.5 16,4.5 11,8.5"/></svg></span>
+    </a>
+  </div>
+
+  <div class="landing-foot">
+    <div class="logo-row">
+      <img src="assets/logos/didart.png" alt="Didart Milano Gallery">
+      <img src="assets/logos/creativo.png" alt="Creativo Milano">
+      <span class="st-mark"><img src="assets/logos/st-signature.png" alt="Sinan Turaman signature"></span>
+      <span class="text-logo">touch.sanat</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DETAILS ===================== -->
+<section id="view-details" class="view">
+
+  <div class="d-hero">
+    <div class="d-hero-bg" style="background-image:url('assets/art/cover.jpg')"></div>
+    <div class="d-hero-content">
+      <span class="eyebrow" data-i18n="details.hero.kicker">Didart Milano &amp; Creativo present</span>
+      <h1 class="d-title">DIAMANTI</h1>
+      <div class="d-hero-meta">
+        <div>
+          <span class="label" data-i18n="details.hero.artistLabel">Artist</span>
+          <span class="value">Sinan Turaman</span>
+        </div>
+        <div>
+          <span class="label" data-i18n="details.hero.venueLabel">Venue</span>
+          <span class="value" data-i18n="details.hero.venue">touch.sanat Gallery</span>
+        </div>
+        <div>
+          <span class="label" data-i18n="details.hero.dateLabel">Dates</span>
+          <span class="value" data-i18n="details.hero.date">12 July 2026 · 19:00</span>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-cue"><span class="stem"></span><span data-i18n="details.hero.scroll">Scroll</span></div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="d-section reveal" id="about">
+    <div class="split">
+      <div>
+        <span class="eyebrow" data-i18n="details.about.eyebrow">The Collection</span>
+        <h2 class="d-h2" data-i18n="details.about.title">Every soul is a jewel.</h2>
+      </div>
+      <div>
+        <p class="body-copy" data-i18n="details.about.p1">DIAMANTI is a series of twenty-four portraits in oil, epoxy and crystal, one for every hour of a single, luminous day. Each canvas catches the light like a cut gem: fractured, luminous, and alive.</p>
+        <p class="body-copy" data-i18n="details.about.p2">Turaman builds his surfaces from oil paint, glitter, reflective foil and layers of epoxy resin, so every piece keeps changing as you move past it &mdash; never quite the same painting twice.</p>
+        <p class="body-copy" data-i18n="details.about.p3">Many of the faces in DIAMANTI carry names from the artist&rsquo;s own family. The exhibition is, in part, a private act of remembrance made public &mdash; a tribute disguised as a portrait series.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><svg class="gem" viewBox="0 0 100 90"><polygon points="35,5 65,5 92,25 50,85 8,25"/></svg><span class="ln"></span></div>
+
+  <!-- BIO -->
+  <div class="d-section reveal" id="bio">
+    <div class="split">
+      <div>
+        <span class="eyebrow" data-i18n="details.bio.eyebrow">The Artist</span>
+        <h2 class="d-h2">Sinan Turaman</h2>
+      </div>
+      <div>
+        <p class="body-copy" data-i18n="details.bio.p1">Sinan Turaman is a multidisciplinary artist who has built two careers in Turkey&rsquo;s creative world. He began as a painter, trained at a boarding fine-arts high school &mdash; until a theft of his early work during his university years pulled him away from the canvas and toward design.</p>
+        <p class="body-copy" data-i18n="details.bio.p2">Working with Outdoor Factory, he went on to shape some of Turkey&rsquo;s most significant public monuments and museums, among them the Yassıada Museum of Democracy and Freedom, the July 15th Martyrs&rsquo; Monument, the Çanakkale Victory Museum, Uzbekistan&rsquo;s national monument, and Miniat&uuml;rk.</p>
+        <p class="body-copy" data-i18n="details.bio.p3">In 2025, during Milano Design Week, Turaman returned to painting with DIAMANTI &mdash; his debut exhibition at Didart Milano Gallery, and a homecoming that brought him back into the art world&rsquo;s spotlight.</p>
+        <p class="credit-line" data-i18n="details.bio.credit">Biography by Dr. Suzan Somalı Sönmez &mdash; Milliyet Newspaper, Istanbul / Turkey</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUOTE -->
+  <div class="quote-section reveal">
+    <p class="quote-mark" data-i18n="details.quote">&ldquo;I try to visualize people&rsquo;s spiritual pleasures.&rdquo;</p>
+    <p class="quote-attr">&mdash; Sinan Turaman</p>
+  </div>
+
+  <!-- GALLERY -->
+  <div class="d-section tight reveal" id="gallery">
+    <div class="gallery-head">
+      <span class="eyebrow" data-i18n="details.gallery.eyebrow">Selected Works</span>
+      <h2 class="d-h2" data-i18n="details.gallery.title">The Diamonds.</h2>
+      <p class="body-copy" data-i18n="details.gallery.body">A selection from the series &mdash; many of the faces painted here carry names from the artist&rsquo;s own family.</p>
+    </div>
+
+    <div class="gallery-grid" id="gallery-grid"></div>
+  </div>
+
+  <div class="divider"><svg class="gem" viewBox="0 0 100 90"><polygon points="35,5 65,5 92,25 50,85 8,25"/></svg><span class="ln"></span></div>
+
+  <!-- CURATOR -->
+  <div class="d-section reveal" id="curator">
+    <div class="curator">
+      <span class="eyebrow" data-i18n="details.curator.eyebrow">Curator&rsquo;s Note</span>
+      <h2 class="d-h2" data-i18n="details.curator.title">A visual poem in light and crystal.</h2>
+      <p data-i18n="details.curator.p1">DIAMANTI is a visual poem where light turns to crystal and feeling takes shape. Conceived around the idea that every soul is, in its own way, a jewel, the series was painted as a tribute to the light each of us carries.</p>
+      <p data-i18n="details.curator.p2">Twenty-four portraits stand for the twenty-four hours of a single day. Each brushstroke catches a different angle of light, so every canvas keeps revealing new colour and new feeling the longer you look. We invite you to step into it.</p>
+      <div class="sign">Diğdem Gen&ccedil;ay Turaman<small data-i18n="details.curator.role">Curator</small></div>
+    </div>
+  </div>
+
+  <!-- VISIT -->
+  <div class="d-section reveal" id="visit">
+    <span class="eyebrow" data-i18n="details.visit.eyebrow">Visit</span>
+    <h2 class="d-h2" data-i18n="details.visit.title" style="margin-bottom:36px;">Join us.</h2>
+    <div class="visit-grid">
+      <div class="visit-card">
+        <span class="v-name">touch.sanat</span>
+        <a class="v-line" href="https://www.google.com/maps/place//data=!4m2!3m1!1s0x14be6f16f663d249:0x14946a6a86743a4?sa=X&amp;ved=1t:8290&amp;ictx=111" target="_blank" rel="noopener" data-i18n="details.visit.touchLine">Hebil Cd. 11-43/1, Türkbükü, 48483 Bodrum/Muğla, Turkey</a>
+        <span class="tba" data-i18n="details.visit.dateTba">12 July 2026 · 19:00</span>
+      </div>
+      <div class="visit-card">
+        <span class="v-name">Didart Milano</span>
+        <span class="v-line">Via Sant&rsquo;Orsola 8/A, 20123 Milano (MI), Italy</span>
+        <a class="v-line" href="https://www.didartmilano.it" target="_blank" rel="noopener">www.didartmilano.it</a>
+        <a class="v-line" href="tel:+390284719247">+39 02 8471 9247</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="d-footer">
+    <div class="logo-row">
+      <img src="assets/logos/didart.png" alt="Didart Milano Gallery">
+      <img src="assets/logos/creativo.png" alt="Creativo Milano">
+      <span class="st-mark"><img src="assets/logos/st-signature.png" alt="Sinan Turaman signature"></span>
+      <span class="text-logo">touch.sanat</span>
+    </div>
+    <p class="copyright" data-i18n="details.footer.copy">Milano, 2026 &mdash; All rights reserved</p>
+  </footer>
+
+</section>
+
+<script>
+/* ===================== i18n ===================== */
+const i18n = {
+  en: {
+    "nav.home":"Diamanti",
+    "ctrl.skip":"Skip",
+    "ctrl.replay":"Replay",
+    "splash.click":"Click",
+    "splash.hint":"Sound on for the full experience",
+    "hero.line1":"Visualizing the spiritual soul,",
+    "hero.line2":"Shining with the splendor of precious stones…",
+    "hero.line3":"A collection dedicated to the light inside us.",
+    "hero.line4":"Experience DIAMANTI,",
+    "hero.line5":"by Sinan Turaman.",
+    "hero.details":"Details",
+    "details.hero.kicker":"Didart Milano & Creativo present",
+    "details.hero.artistLabel":"Artist",
+    "details.hero.venueLabel":"Venue",
+    "details.hero.venue":"touch.sanat Gallery",
+    "details.hero.dateLabel":"Dates",
+    "details.hero.date":"12 July 2026 · 19:00",
+    "details.hero.scroll":"Scroll",
+    "details.about.eyebrow":"The Collection",
+    "details.about.title":"Every soul is a jewel.",
+    "details.about.p1":"DIAMANTI is a series of twenty-four portraits in oil, epoxy and crystal, one for every hour of a single, luminous day. Each canvas catches the light like a cut gem: fractured, luminous, and alive.",
+    "details.about.p2":"Turaman builds his surfaces from oil paint, glitter, reflective foil and layers of epoxy resin, so every piece keeps changing as you move past it — never quite the same painting twice.",
+    "details.about.p3":"Many of the faces in DIAMANTI carry names from the artist’s own family. The exhibition is, in part, a private act of remembrance made public — a tribute disguised as a portrait series.",
+    "details.bio.eyebrow":"The Artist",
+    "details.bio.p1":"Sinan Turaman is a multidisciplinary artist who has built two careers in Turkey’s creative world. He began as a painter, trained at a boarding fine-arts high school — until a theft of his early work during his university years pulled him away from the canvas and toward design.",
+    "details.bio.p2":"Working with Outdoor Factory, he went on to shape some of Turkey’s most significant public monuments and museums, among them the Yassıada Museum of Democracy and Freedom, the July 15th Martyrs’ Monument, the Çanakkale Victory Museum, Uzbekistan’s national monument, and Miniatürk.",
+    "details.bio.p3":"In 2025, during Milano Design Week, Turaman returned to painting with DIAMANTI — his debut exhibition at Didart Milano Gallery, and a homecoming that brought him back into the art world’s spotlight.",
+    "details.bio.credit":"Biography by Dr. Suzan Somalı Sönmez — Milliyet Newspaper, Istanbul / Turkey",
+    "details.quote":"“I try to visualize people’s spiritual pleasures.”",
+    "details.gallery.eyebrow":"Selected Works",
+    "details.gallery.title":"The Diamonds.",
+    "details.gallery.body":"A selection from the series — many of the faces painted here carry names from the artist’s own family.",
+    "details.curator.eyebrow":"Curator’s Note",
+    "details.curator.title":"A visual poem in light and crystal.",
+    "details.curator.p1":"DIAMANTI is a visual poem where light turns to crystal and feeling takes shape. Conceived around the idea that every soul is, in its own way, a jewel, the series was painted as a tribute to the light each of us carries.",
+    "details.curator.p2":"Twenty-four portraits stand for the twenty-four hours of a single day. Each brushstroke catches a different angle of light, so every canvas keeps revealing new colour and new feeling the longer you look. We invite you to step into it.",
+    "details.curator.role":"Curator",
+    "details.visit.eyebrow":"Visit",
+    "details.visit.title":"Join us.",
+    "details.visit.touchLine":"Hebil Cd. 11-43/1, Türkbükü, 48483 Bodrum/Muğla, Turkey",
+    "details.visit.dateTba":"12 July 2026 · 19:00",
+    "details.footer.copy":"Milano, 2026 — All rights reserved"
+  },
+  tr: {
+    "nav.home":"Diamanti",
+    "ctrl.skip":"Geç",
+    "ctrl.replay":"Tekrar",
+    "splash.click":"Tıkla",
+    "splash.hint":"En iyi deneyim için sesi açın",
+    "hero.line1":"Ruhun ışığını görselleştiren,",
+    "hero.line2":"değerli taşların ihtişamıyla parıldayan…",
+    "hero.line3":"İçimizdeki ışığa adanmış bir koleksiyon.",
+    "hero.line4":"DIAMANTI’yi keşfedin,",
+    "hero.line5":"Sinan Turaman imzasıyla.",
+    "hero.details":"Detaylar",
+    "details.hero.kicker":"Didart Milano & Creativo sunar",
+    "details.hero.artistLabel":"Sanatçı",
+    "details.hero.venueLabel":"Mekân",
+    "details.hero.venue":"touch.sanat Sanat Galerisi",
+    "details.hero.dateLabel":"Tarih",
+    "details.hero.date":"12 Temmuz 2026 · 19:00",
+    "details.hero.scroll":"Kaydır",
+    "details.about.eyebrow":"Koleksiyon",
+    "details.about.title":"Her ruh bir mücevherdir.",
+    "details.about.p1":"DİAMANTİ; yağlı boya, epoksi ve kristalden oluşan, ışıltılı tek bir günün her saatine adanmış 24 portreden oluşan bir seridir. Her tuval, ışığın açısına göre değişen, kırılgan ve canlı bir yüzeye sahiptir.",
+    "details.about.p2":"Turaman; yağlı boya, sim, yansıtıcı folyo ve epoksi vernik katmanlarını bir araya getirerek izleyiciyle sürekli yenilenen bir ilişki kurar — her eser, önünden geçtikçe değişir.",
+    "details.about.p3":"DİAMANTİ'deki yüzlerin birçoğu, sanatçının kendi ailesinden isimler taşır. Sergi, bir yönüyle, herkese açık hale gelen özel bir anma törenidir — bir portre serisi kılığında sunulan bir saygı duruşu.",
+    "details.bio.eyebrow":"Sanatçı",
+    "details.bio.p1":"Sinan Turaman, Türkiye'de çağdaş sanat ve tasarım dünyasında kendine özgün bir yer edinmiş çok yönlü bir sanatçıdır. Kariyerine resimle başlayan Turaman'ı, üniversite yıllarında eserlerinin çalınması bir süreliğine tuvalden uzaklaştırarak tasarıma yönlendirmiştir.",
+    "details.bio.p2":"Outdoor Factory bünyesinde; Yassıada Demokrasi ve Özgürlük Müzesi, 15 Temmuz Şehitler Anıtı, Çanakkale Zafer Müzesi, Özbekistan Ulusal Anıtı ve Miniatürk gibi Türkiye'nin en önemli kamusal anıt ve müze projelerine imza atmıştır.",
+    "details.bio.p3":"2025 yılında, Milano Design Week kapsamında Didart Milano Gallery'de açılan “Diamanti” sergisiyle resme güçlü bir dönüş yapmış; bu dönüş onu sanat çevrelerinin yeniden ilgi odağı haline getirmiştir.",
+    "details.bio.credit":"Biyografi: Dr. Suzan Somalı Sönmez — Milliyet Gazetesi, İstanbul / Türkiye",
+    "details.quote":"“İnsanların ruhsal zevklerini görselleştirmeye çalışıyorum.”",
+    "details.gallery.eyebrow":"Seçilmiş Eserler",
+    "details.gallery.title":"Elmaslar.",
+    "details.gallery.body":"Koleksiyondan bir seçki — buradaki yüzlerin birçoğu sanatçının kendi ailesinden isimler taşımaktadır.",
+    "details.curator.eyebrow":"Küratör Notu",
+    "details.curator.title":"Işığın kristalleştiği görsel bir şiir.",
+    "details.curator.p1":"DİAMANTİ, ışığın kristalleştiği, derinliğin ihtişamla buluştuğu ve duyguların biçim kazandığı görsel bir şiirdir. “Her ruh kendi biçiminde bir mücevherdir” düşüncesinden ilham alan bu seri, her birimizin içinde taşıdığı ışığa adanmış bir övgü olarak resmedilmiştir.",
+    "details.curator.p2":"24 portre, tek bir günün 24 saatini simgelemektedir. Her fırça darbesi ışığın farklı bir açısını yakalar; böylece her tuval, ona ne kadar uzun bakarsanız o kadar yeni bir renk ve duygu ortaya çıkarır. Sizi bu dünyayı keşfetmeye davet ediyoruz.",
+    "details.curator.role":"Küratör",
+    "details.visit.eyebrow":"Ziyaret",
+    "details.visit.title":"Bize katılın.",
+    "details.visit.touchLine":"Hebil Cd. 11-43/1, Türkbükü, 48483 Bodrum/Muğla",
+    "details.visit.dateTba":"12 Temmuz 2026 · 19:00",
+    "details.footer.copy":"Milano, 2026 — Tüm hakları saklıdır"
+  }
+};
+
+const MED = {
+  en: { epoxy:"Oil on canvas, epoxy", swar:"Oil on canvas, epoxy & Swarovski crystals", diam:"Oil on canvas, epoxy & diamonds" },
+  tr: { epoxy:"Yağlı boya üstüne epoksi", swar:"Yağlı boya üstüne epoksi ve Swarovski kristalleri", diam:"Yağlı boya üstüne epoksi ve elmaslar" }
+};
+
+const ARTWORKS = [
+  { file:"digdem",      name:"Diğdem",      med:"epoxy", size:"250 × 170 cm" },
+  { file:"anne",        name:"Anne",        med:"epoxy", size:"250 × 170 cm" },
+  { file:"cigdem-I",    name:"Çiğdem",      med:"epoxy", size:"250 × 170 cm" },
+  { file:"duru",        name:"Duru",        med:"epoxy", size:"250 × 170 cm" },
+  { file:"mercan",      name:"Mercan",      med:"epoxy", size:"260 × 175 cm" },
+  { file:"nur",         name:"Nur",         med:"epoxy", size:"180 × 125 cm" },
+  { file:"inci-II",     name:"İnci",        med:"epoxy", size:"160 × 110 cm" },
+  { file:"inci-I",      name:"İnci",        med:"swar",  size:"115 × 80 cm"  },
+  { file:"waffle",      name:"Waffle",      med:"epoxy", size:"130 × 135 cm" },
+  { file:"ippopotamo",  name:"Ippopotamo",  med:"swar",  size:"112 × 100 cm" },
+  { file:"ayi",         name:"Ayı",         med:"swar",  size:"110 × 110 cm" },
+  { file:"afro",        name:"Afro",        med:"swar",  size:"160 × 110 cm" },
+  { file:"maradona",    name:"Maradona",    med:"swar",  size:"130 × 90 cm"  },
+  { file:"gorilla",     name:"Gorilla",     med:"diam",  size:"80 × 55 cm"   },
+  { file:"cigdem-II",   name:"Çiğdem",      med:"diam",  size:"132 × 87 cm"  },
+  { file:"gladiatore",  name:"Gladiatore",  med:"diam",  size:"60 × 80 cm"   },
+  { file:"aurelio",     name:"Aurelio",     med:"diam",  size:"60 × 80 cm"   },
+  { file:"dante",       name:"Dante",       med:"diam",  size:"50 × 50 cm"   }
+];
+
+let currentLang = (navigator.language || "en").toLowerCase().startsWith("tr") ? "tr" : "en";
+
+function applyLang(lang){
+  currentLang = lang;
+  document.documentElement.setAttribute("data-lang", lang);
+  document.documentElement.setAttribute("lang", lang);
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const key = el.getAttribute("data-i18n");
+    if(i18n[lang][key] !== undefined) el.innerHTML = i18n[lang][key];
+  });
+  document.querySelectorAll('[data-set-lang]').forEach(b=>{
+    b.setAttribute("aria-pressed", b.getAttribute("data-set-lang")===lang ? "true":"false");
+  });
+  renderGallery();
+  try{ localStorage.setItem("diamanti_lang", lang); }catch(e){}
+  if(typeof currentView !== "undefined" && currentView === "landing") startIntro();
+}
+
+document.querySelectorAll('[data-set-lang]').forEach(btn=>{
+  btn.addEventListener("click", ()=> applyLang(btn.getAttribute("data-set-lang")));
+});
+
+/* ===================== gallery render ===================== */
+function renderGallery(){
+  const grid = document.getElementById("gallery-grid");
+  if(!grid) return;
+  grid.innerHTML = "";
+  ARTWORKS.forEach(a=>{
+    const div = document.createElement("div");
+    div.className = "g-item";
+    div.tabIndex = 0;
+    div.innerHTML = `
+      <img src="assets/art/${a.file}.jpg" alt="${a.name}" loading="lazy">
+      <div class="g-cap">
+        <div class="name">${a.name}</div>
+        <div class="med">${MED[currentLang][a.med]}, ${a.size}</div>
+      </div>`;
+    div.addEventListener("click", ()=> openLightbox(a));
+    div.addEventListener("keydown", e=>{ if(e.key==="Enter") openLightbox(a); });
+    grid.appendChild(div);
+  });
+}
+
+/* ===================== lightbox ===================== */
+let lightbox;
+function openLightbox(a){
+  if(!lightbox){
+    lightbox = document.createElement("div");
+    lightbox.id = "lightbox";
+    lightbox.style.cssText = "position:fixed;inset:0;background:rgba(7,7,7,.96);z-index:90;display:flex;align-items:center;justify-content:center;padding:40px;opacity:0;transition:opacity .35s;";
+    lightbox.innerHTML = `
+      <button id="lb-close" aria-label="Close" style="position:absolute;top:24px;right:28px;font-size:1.6rem;color:var(--fg);line-height:1;">&times;</button>
+      <figure style="max-width:min(90vw,640px);text-align:center;margin:0;">
+        <img id="lb-img" style="max-width:100%;max-height:74vh;object-fit:contain;display:block;margin:0 auto;">
+        <figcaption style="margin-top:18px;">
+          <div id="lb-name" style="font-family:var(--display);font-size:1.4rem;"></div>
+          <div id="lb-med" style="font-size:.78rem;letter-spacing:.04em;color:var(--fg-dim);margin-top:6px;"></div>
+        </figcaption>
+      </figure>`;
+    document.body.appendChild(lightbox);
+    lightbox.addEventListener("click", e=>{ if(e.target===lightbox) closeLightbox(); });
+    lightbox.querySelector("#lb-close").addEventListener("click", closeLightbox);
+    document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeLightbox(); });
+  }
+  lightbox.querySelector("#lb-img").src = `assets/art/${a.file}.jpg`;
+  lightbox.querySelector("#lb-name").textContent = a.name;
+  lightbox.querySelector("#lb-med").textContent = `${MED[currentLang][a.med]}, ${a.size}`;
+  lightbox.style.display = "flex";
+  requestAnimationFrame(()=> lightbox.style.opacity = "1");
+}
+function closeLightbox(){
+  if(!lightbox) return;
+  lightbox.style.opacity = "0";
+  setTimeout(()=> lightbox.style.display="none", 350);
+}
+
+/* ===================== view switching ===================== */
+const views = {
+  splash: document.getElementById("view-splash"),
+  landing: document.getElementById("view-landing"),
+  details: document.getElementById("view-details")
+};
+const homeMark = document.getElementById("home-mark");
+let currentView = "splash";
+
+function showView(name){
+  Object.entries(views).forEach(([k,el])=>{
+    const active = k===name;
+    el.classList.toggle("active", active);
+    el.setAttribute("aria-hidden", active ? "false" : "true");
+  });
+  homeMark.classList.toggle("show", name==="details");
+  currentView = name;
+  if(name==="landing") startIntro();
+  if(name==="details") views.details.scrollTop = 0;
+  updateIntroControls();
+}
+
+/* ===================== typewriter intro ===================== */
+const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let introState = "idle"; // idle | playing | done
+let introToken = 0;
+const TYPE_SPEED = 58;     // ms per character
+const LINE_PAUSE = 560;    // pause between lines
+const skipBtn = document.getElementById("skip-intro-btn");
+const replayBtn = document.getElementById("replay-intro-btn");
+
+function updateIntroControls(){
+  const onLanding = currentView === "landing";
+  skipBtn.style.display = (onLanding && introState === "playing") ? "flex" : "none";
+  replayBtn.style.display = (onLanding && introState === "done") ? "flex" : "none";
+}
+
+function startIntro(){
+  const myToken = ++introToken;
+  const lineEls = Array.from(document.querySelectorAll(".hero-line"));
+  const rule = document.getElementById("hero-rule-top");
+  const cta = document.getElementById("open-details");
+
+  lineEls.forEach(el=> el.textContent = "");
+  rule.classList.remove("in");
+  cta.classList.remove("in");
+
+  if(prefersReducedMotion){
+    finishIntro(myToken, lineEls, rule, cta, true);
+    return;
+  }
+
+  introState = "playing";
+  updateIntroControls();
+
+  function typeLine(i){
+    if(myToken !== introToken) return;
+    if(i >= lineEls.length){
+      setTimeout(()=>{
+        if(myToken !== introToken) return;
+        cta.classList.add("in");
+        introState = "done";
+        updateIntroControls();
+      }, 500);
+      return;
+    }
+    const el = lineEls[i];
+    const full = i18n[currentLang][el.getAttribute("data-i18n")] || "";
+    const caret = document.createElement("span");
+    caret.className = "caret";
+    el.appendChild(caret);
+    let ci = 0;
+    (function step(){
+      if(myToken !== introToken) return;
+      if(ci < full.length){
+        caret.insertAdjacentText("beforebegin", full[ci]);
+        ci++;
+        setTimeout(step, TYPE_SPEED);
+      } else {
+        caret.remove();
+        setTimeout(()=> typeLine(i+1), LINE_PAUSE);
+      }
+    })();
+  }
+
+  setTimeout(()=>{
+    if(myToken !== introToken) return;
+    rule.classList.add("in");
+    typeLine(0);
+  }, 250);
+}
+
+function finishIntro(myToken, lineEls, rule, cta, instant){
+  if(typeof myToken === "number") introToken = myToken;
+  lineEls = lineEls || Array.from(document.querySelectorAll(".hero-line"));
+  rule = rule || document.getElementById("hero-rule-top");
+  cta = cta || document.getElementById("open-details");
+  lineEls.forEach(el=>{
+    el.querySelectorAll(".caret").forEach(c=>c.remove());
+    el.textContent = i18n[currentLang][el.getAttribute("data-i18n")] || "";
+  });
+  rule.classList.add("in");
+  cta.classList.add("in");
+  introState = "done";
+  updateIntroControls();
+}
+
+function skipIntro(){
+  introToken++;
+  finishIntro();
+}
+
+function replayIntro(){
+  startIntro();
+}
+
+skipBtn.addEventListener("click", skipIntro);
+replayBtn.addEventListener("click", replayIntro);
+
+/* ===================== audio ===================== */
+const audio = document.getElementById("bg-audio");
+let audioStarted = false;
+function startAudio(){
+  if(audioStarted) return;
+  audioStarted = true;
+  audio.volume = 0.55;
+  audio.play().catch(()=>{ /* will retry on next gesture */ audioStarted = false; });
+}
+const muteBtn = document.getElementById("mute-toggle");
+const iconOn = document.getElementById("icon-sound-on");
+const iconOff = document.getElementById("icon-sound-off");
+muteBtn.addEventListener("click", ()=>{
+  audio.muted = !audio.muted;
+  muteBtn.setAttribute("aria-pressed", audio.muted ? "true":"false");
+  iconOn.style.display = audio.muted ? "none":"block";
+  iconOff.style.display = audio.muted ? "block":"none";
+  try{ localStorage.setItem("diamanti_muted", audio.muted ? "1":"0"); }catch(e){}
+});
+
+/* ===================== splash → landing ===================== */
+function enterSite(){
+  startAudio();
+  showView("landing");
+}
+views.splash.addEventListener("click", enterSite);
+views.splash.addEventListener("keydown", e=>{ if(e.key==="Enter" || e.key===" "){ e.preventDefault(); enterSite(); } });
+
+document.getElementById("open-details").addEventListener("click", e=>{
+  e.preventDefault();
+  showView("details");
+});
+homeMark.addEventListener("click", e=>{
+  e.preventDefault();
+  showView("landing");
+});
+
+/* ===================== scroll reveals ===================== */
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(en=>{ if(en.isIntersecting) en.target.classList.add("in"); });
+},{ threshold:0.18 });
+document.querySelectorAll(".reveal").forEach(el=> io.observe(el));
+
+/* ===================== init ===================== */
+(function init(){
+  let savedLang = null, savedMuted = null;
+  try{ savedLang = localStorage.getItem("diamanti_lang"); savedMuted = localStorage.getItem("diamanti_muted"); }catch(e){}
+  applyLang(savedLang || currentLang);
+  if(savedMuted === "1"){
+    audio.muted = true;
+    muteBtn.setAttribute("aria-pressed","true");
+    iconOn.style.display = "none";
+    iconOff.style.display = "block";
+  }
+})();
+</script>
+</body>
+</html>
