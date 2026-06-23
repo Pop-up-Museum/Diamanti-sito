@@ -26,6 +26,12 @@
     --display: 'Italiana', serif;
     --body: 'Jost', sans-serif;
   }
+    img[src*="digdem"], 
+    img[src*="cigdem"], 
+    img[src*="waffle"] {
+    clip-path: inset(4% 0 0 0); /* Taglia il 4% sopra */
+    transform: scale(1.04) translateY(-2%); /* Ridimensiona leggermente per coprire il buco lasciato dal taglio */
+  }
   /* ---------- making of video ---------- */
   .making-of-container {
     width: 100%;
