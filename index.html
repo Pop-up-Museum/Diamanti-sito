@@ -500,7 +500,7 @@
   <div class="d-hero">
     <div class="d-hero-bg" style="background-image:url('assets/art/cover.jpg')"></div>
     <div class="d-hero-content">
-      <span class="eyebrow" data-i18n="details.hero.kicker">Didart Milano &amp; Creativo present</span>
+      <span class="eyebrow" data-i18n="details.hero.kicker">touch.sanat &amp; Didart Milano present</span>
       <h1 class="d-title">DIAMANTI</h1>
       <div class="d-hero-meta">
         <div>
@@ -573,7 +573,7 @@
   <div class="divider"><svg class="gem" viewBox="0 0 100 90"><polygon points="35,5 65,5 92,25 50,85 8,25"/></svg><span class="ln"></span></div>
   <!-- VIDEO -->
   <div class="making-of-container reveal">
-  <video src="Making of.mp4" autoplay loop muted playsinline></video>
+  <video src="assets/video/making-of.mp4" controls autoplay loop muted playsinline></video>
   <p class="eyebrow" style="text-align: center; margin-top: 12px;" data-i18n="details.makingof">Making of - Behind the scenes</p>
   </div>
 
@@ -637,7 +637,7 @@ const i18n = {
     "hero.line4":"Experience DIAMANTI,",
     "hero.line5":"by Sinan Turaman.",
     "hero.details":"Details",
-    "details.hero.kicker":"Didart Milano & Creativo present",
+    "details.hero.kicker":"touch.sanat & Didart Milano present",
     "details.hero.artistLabel":"Artist",
     "details.hero.venueLabel":"Venue",
     "details.hero.venue":"touch.sanat Gallery",
@@ -683,7 +683,7 @@ const i18n = {
     "hero.line4":"DIAMANTI’yi keşfedin,",
     "hero.line5":"Sinan Turaman imzasıyla.",
     "hero.details":"Detaylar",
-    "details.hero.kicker":"Didart Milano & Creativo sunar",
+    "details.hero.kicker":"touch.sanat & Didart Milano sunar",
     "details.hero.artistLabel":"Sanatçı",
     "details.hero.venueLabel":"Mekân",
     "details.hero.venue":"touch.sanat Sanat Galerisi",
@@ -951,13 +951,22 @@ function startAudio(){
 const muteBtn = document.getElementById("mute-toggle");
 const iconOn = document.getElementById("icon-sound-on");
 const iconOff = document.getElementById("icon-sound-off");
-muteBtn.addEventListener("click", ()=>{
-  audio.muted = !audio.muted;
-  muteBtn.setAttribute("aria-pressed", audio.muted ? "true":"false");
-  iconOn.style.display = audio.muted ? "none":"block";
-  iconOff.style.display = audio.muted ? "block":"none";
-  try{ localStorage.setItem("diamanti_muted", audio.muted ? "1":"0"); }catch(e){}
-});
+function setAmbientMuted(muted){
+  audio.muted = muted;
+  muteBtn.setAttribute("aria-pressed", muted ? "true":"false");
+  iconOn.style.display = muted ? "none":"block";
+  iconOff.style.display = muted ? "block":"none";
+  try{ localStorage.setItem("diamanti_muted", muted ? "1":"0"); }catch(e){}
+}
+muteBtn.addEventListener("click", ()=> setAmbientMuted(!audio.muted));
+
+/* duck the ambient track if the making-of video is unmuted, so the two don't overlap */
+const makingOfVideo = document.querySelector(".making-of-container video");
+if(makingOfVideo){
+  makingOfVideo.addEventListener("volumechange", ()=>{
+    if(!makingOfVideo.muted && !audio.muted) setAmbientMuted(true);
+  });
+}
 
 /* ===================== splash → landing ===================== */
 function enterSite(){
@@ -987,12 +996,7 @@ document.querySelectorAll(".reveal").forEach(el=> io.observe(el));
   let savedLang = null, savedMuted = null;
   try{ savedLang = localStorage.getItem("diamanti_lang"); savedMuted = localStorage.getItem("diamanti_muted"); }catch(e){}
   applyLang(savedLang || currentLang);
-  if(savedMuted === "1"){
-    audio.muted = true;
-    muteBtn.setAttribute("aria-pressed","true");
-    iconOn.style.display = "none";
-    iconOff.style.display = "block";
-  }
+  if(savedMuted === "1") setAmbientMuted(true);
 })();
 </script>
 </body>
